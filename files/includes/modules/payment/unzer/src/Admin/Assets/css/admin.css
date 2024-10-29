@@ -1,0 +1,32 @@
+.unzer-table{
+    width: 100%;
+}
+
+.unzer-table tr:nth-child(odd) {
+    background: #ddd;
+}
+
+.unzer-table td {
+    padding: 4px;
+}
+
+.unzer-payment-method-label{
+    display: flex;
+    align-items: center;
+}
+
+#unzer-webhook-container .alert{
+    background-color: #F2DEDE;
+    border: solid #DCA7A7 1px;
+    color: #A94442;
+    font-family: Verdana, Arial, sans-serif;
+    font-size: 12px;
+    padding: 4px;
+    margin:10px 0;
+}
+
+#unzer-webhook-container .alert.alert-success{
+    background-color: #DFF0D8;
+    border: solid #aec694 1px;
+    color: #3C763D;
+}

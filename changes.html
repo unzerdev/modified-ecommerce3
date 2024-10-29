@@ -1,0 +1,269 @@
+<!doctype html><html><head>
+<meta http-equiv="content-type" content="text/html;charset=utf-8">
+<title>Diff</title><title>Compare  vs </title>
+<style type="text/css">
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 100%;
+    margin: 0;
+    padding: 10px;
+    background-color: #F0F0F0;
+}
+.tab {border-color:#808080; border-style:solid; border-width:1px 1px 1px 1px; border-collapse:collapse; width:100%;}
+.tth {border-color:#808080; border-style:solid; border-width:1px 1px 1px 1px; border-collapse:collapse; padding:4px; vertical-align:top; text-align:left; background-color:#E0E0E0; width:50%;}
+.ttd {border-color:#808080; border-style:solid; border-width:1px 1px 1px 1px; border-collapse:collapse; padding:4px; vertical-align:top; text-align:left; width:50%;line-break: anywhere;}
+.hdr {color:black; font-size:85%;}
+.inf {color:#C08000; font-size:85%;}
+.err {color:red; font-size:85%; font-weight:bold; margin:0;}
+.msg {color:#508050; font-size:85%; font-weight:bold; margin:0;}
+.lno {color:#C08000; background-color:white; font-style:italic; margin:0;}
+.lno::after{content: attr(rel);}
+.nop {color:black; font-size:75%; font-family:monospace; white-space:pre-wrap; margin:0; display:block;}
+.upd {color:black; font-size:75%; font-family:monospace; white-space:pre-wrap; margin:0; background-color:#CFCFFF; display:block;}
+.emp {color:black; font-size:75%; font-family:monospace; white-space:pre-wrap; margin:0; background-color:#E0E0E0; display:block;}
+.add {color:black; font-size:75%; font-family:monospace; white-space:pre-wrap; margin:0; background-color:#CFFFCF; display:block;}
+.del {color:black; font-size:75%; font-family:monospace; white-space:pre-wrap; margin:0; background-color:#FFCFCF; display:block;}
+.chg {color:#C00080; background-color:#AFAFDF;}
+</style></head><body>
+<div style="margin-bottom:10px;">Unzer Payments</div><table class="tab"><tr><td class="tth"><span class="hdr">/checkout_confirmation.php</span></td><td class="tth"><span class="hdr">/checkout_confirmation.php</span></td></tr><tr><td class="ttd"><span class="nop"><span class="lno" rel="38 "></span>// include needed functions
+<span class="lno" rel="39 "></span>require_once (DIR_FS_INC . &#39;xtc_collect_posts.inc.php&#39;);
+<span class="lno" rel="40 "></span>require_once (DIR_FS_INC . &#39;xtc_display_tax_value.inc.php&#39;);
+<span class="lno" rel="41 "></span>
+<span class="lno" rel="42 "></span>// create smarty elements
+<span class="lno" rel="43 "></span>$smarty = new Smarty();
+<span class="lno" rel="44 "></span>
+<span class="lno" rel="45 "></span>require (DIR_WS_INCLUDES.&#39;checkout_requirements.php&#39;);
+<span class="lno" rel="46 "></span>
+<span class="lno" rel="47 "></span>if (isset($_POST[&#39;payment&#39;])) {
+</span><span class="nop"><span class="lno"> </span>
+<span class="lno"> </span>
+<span class="lno"> </span>
+<span class="lno"> </span>
+<span class="lno"> </span>
+<span class="lno"> </span>
+<span class="lno"> </span>
+<span class="lno"> </span>
+<span class="lno"> </span>
+</span><span class="nop"><span class="lno" rel="48 "></span>  $_SESSION[&#39;payment&#39;] = xtc_db_prepare_input($_POST[&#39;payment&#39;]);
+<span class="lno" rel="49 "></span>}
+<span class="lno" rel="50 "></span>
+<span class="lno" rel="51 "></span>if (isset($_POST[&#39;comments_added&#39;]) &amp;&amp; $_POST[&#39;comments_added&#39;] != &#39;&#39;) {
+<span class="lno" rel="52 "></span>  $_SESSION[&#39;comments&#39;] = xtc_db_prepare_input($_POST[&#39;comments&#39;]);
+<span class="lno" rel="53 "></span>}
+<span class="lno" rel="54 "></span>
+<span class="lno" rel="55 "></span>if (isset($_POST[&#39;cot_gv&#39;])) {
+<span class="lno" rel="56 "></span>  $_SESSION[&#39;cot_gv&#39;] = $_POST[&#39;cot_gv&#39;];
+<span class="lno" rel="57 "></span>}
+</span></td><td class="ttd"><span class="nop"><span class="lno" rel="38 "></span>// include needed functions
+<span class="lno" rel="39 "></span>require_once (DIR_FS_INC . &#39;xtc_collect_posts.inc.php&#39;);
+<span class="lno" rel="40 "></span>require_once (DIR_FS_INC . &#39;xtc_display_tax_value.inc.php&#39;);
+<span class="lno" rel="41 "></span>
+<span class="lno" rel="42 "></span>// create smarty elements
+<span class="lno" rel="43 "></span>$smarty = new Smarty();
+<span class="lno" rel="44 "></span>
+<span class="lno" rel="45 "></span>require (DIR_WS_INCLUDES.&#39;checkout_requirements.php&#39;);
+<span class="lno" rel="46 "></span>
+<span class="lno" rel="47 "></span>if (isset($_POST[&#39;payment&#39;])) {
+</span><span class="add"><span class="lno" rel="48 "></span>    
+<span class="lno" rel="49 "></span>  // UNZER MOD START
+<span class="lno" rel="50 "></span>  $selectedPayment = $_POST[&#39;payment&#39;] ?? &#39;&#39;;
+<span class="lno" rel="51 "></span>  if(str_starts_with($selectedPayment, &#39;unzer_&#39;)){
+<span class="lno" rel="52 "></span>    $_POST[&#39;payment&#39;] = UnzerConstants::MODULE_NAME;
+<span class="lno" rel="53 "></span>    $_SESSION[&#39;unzer_payment_method&#39;] = substr($selectedPayment, 6);
+<span class="lno" rel="54 "></span>  }
+<span class="lno" rel="55 "></span>  // UNZER MOD END
+<span class="lno" rel="56 "></span>
+</span><span class="nop"><span class="lno" rel="57 "></span>  $_SESSION[&#39;payment&#39;] = xtc_db_prepare_input($_POST[&#39;payment&#39;]);
+<span class="lno" rel="58 "></span>}
+<span class="lno" rel="59 "></span>
+<span class="lno" rel="60 "></span>if (isset($_POST[&#39;comments_added&#39;]) &amp;&amp; $_POST[&#39;comments_added&#39;] != &#39;&#39;) {
+<span class="lno" rel="61 "></span>  $_SESSION[&#39;comments&#39;] = xtc_db_prepare_input($_POST[&#39;comments&#39;]);
+<span class="lno" rel="62 "></span>}
+<span class="lno" rel="63 "></span>
+<span class="lno" rel="64 "></span>if (isset($_POST[&#39;cot_gv&#39;])) {
+<span class="lno" rel="65 "></span>  $_SESSION[&#39;cot_gv&#39;] = $_POST[&#39;cot_gv&#39;];
+<span class="lno" rel="66 "></span>}
+</span></td></tr>
+</table><br>
+<table class="tab"><tr><td class="tth"><span class="hdr">/checkout_payment.php</span></td><td class="tth"><span class="hdr">/checkout_payment.php</span></td></tr><tr><td class="ttd"><span class="nop"><span class="lno" rel="244"></span>      $selection[$i][&#39;selection&#39;] = xtc_draw_radio_field(&#39;payment&#39;, $selection[$i][&#39;id&#39;], ($selection[$i][&#39;checked&#39;]), &#39;id=&#34;rd-&#39;.($i+1).&#39;&#34;&#39;); // pre-selection the first payment option
+<span class="lno" rel="245"></span>    } else {
+<span class="lno" rel="246"></span>      //$selection[$i][&#39;selection&#39;] = xtc_draw_hidden_field(&#39;payment&#39;, $selection[$i][&#39;id&#39;]);
+<span class="lno" rel="247"></span>      $selection[$i][&#39;selection&#39;] = xtc_draw_radio_field(&#39;payment&#39;, $selection[$i][&#39;id&#39;], 1, &#39;id=&#34;rd-&#39;.($i+1).&#39;&#34;&#39;);
+<span class="lno" rel="248"></span>    }
+<span class="lno" rel="249"></span>
+<span class="lno" rel="250"></span>    if (!isset($selection[$i][&#39;error&#39;])) {
+<span class="lno" rel="251"></span>      $radio_buttons++;
+<span class="lno" rel="252"></span>    }
+<span class="lno" rel="253"></span>  }
+</span><span class="nop"><span class="lno"> </span>
+<span class="lno"> </span>
+<span class="lno"> </span>
+<span class="lno"> </span>
+<span class="lno"> </span>
+<span class="lno"> </span>
+<span class="lno"> </span>
+<span class="lno"> </span>
+</span><span class="nop"><span class="lno" rel="254"></span>  $module_smarty-&gt;assign(&#39;module_content&#39;, $selection);
+<span class="lno" rel="255"></span>} 
+<span class="lno" rel="256"></span>//Coupon 100%
+<span class="lno" rel="257"></span>elseif (isset($_SESSION[&#39;cc_id&#39;]) &amp;&amp; $total &lt;= 0) {
+<span class="lno" rel="258"></span>  $order_total_modules-&gt;pre_confirmation_check();
+<span class="lno" rel="259"></span>  $smarty-&gt;assign(&#39;GV_COVER&#39;, &#39;true&#39;);
+<span class="lno" rel="260"></span>} 
+<span class="lno" rel="261"></span>//Guthaben
+<span class="lno" rel="262"></span>elseif (!isset($_SESSION[&#39;cot_gv&#39;]) || $total &lt;= 0) {
+<span class="lno" rel="263"></span>  $order_total_modules-&gt;pre_confirmation_check();
+</span></td><td class="ttd"><span class="nop"><span class="lno" rel="244"></span>      $selection[$i][&#39;selection&#39;] = xtc_draw_radio_field(&#39;payment&#39;, $selection[$i][&#39;id&#39;], ($selection[$i][&#39;checked&#39;]), &#39;id=&#34;rd-&#39;.($i+1).&#39;&#34;&#39;); // pre-selection the first payment option
+<span class="lno" rel="245"></span>    } else {
+<span class="lno" rel="246"></span>      //$selection[$i][&#39;selection&#39;] = xtc_draw_hidden_field(&#39;payment&#39;, $selection[$i][&#39;id&#39;]);
+<span class="lno" rel="247"></span>      $selection[$i][&#39;selection&#39;] = xtc_draw_radio_field(&#39;payment&#39;, $selection[$i][&#39;id&#39;], 1, &#39;id=&#34;rd-&#39;.($i+1).&#39;&#34;&#39;);
+<span class="lno" rel="248"></span>    }
+<span class="lno" rel="249"></span>
+<span class="lno" rel="250"></span>    if (!isset($selection[$i][&#39;error&#39;])) {
+<span class="lno" rel="251"></span>      $radio_buttons++;
+<span class="lno" rel="252"></span>    }
+<span class="lno" rel="253"></span>  }
+</span><span class="add"><span class="lno" rel="254"></span>
+<span class="lno" rel="255"></span>  // UNZER MOD START
+<span class="lno" rel="256"></span>  if (($position = array_search(&#39;unzer&#39;, array_column($selection, &#39;id&#39;))) !== false) {
+<span class="lno" rel="257"></span>    $unzerPaymentMethods = (new UnzerCheckoutHelper())-&gt;getAvailablePaymentMethods(false, $_SESSION[&#39;unzer_payment_method&#39;]??null);
+<span class="lno" rel="258"></span>    array_splice($selection, $position, 1, $unzerPaymentMethods);
+<span class="lno" rel="259"></span>  }
+<span class="lno" rel="260"></span>  // UNZER MOD END
+<span class="lno" rel="261"></span>
+</span><span class="nop"><span class="lno" rel="262"></span>  $module_smarty-&gt;assign(&#39;module_content&#39;, $selection);
+<span class="lno" rel="263"></span>} 
+<span class="lno" rel="264"></span>//Coupon 100%
+<span class="lno" rel="265"></span>elseif (isset($_SESSION[&#39;cc_id&#39;]) &amp;&amp; $total &lt;= 0) {
+<span class="lno" rel="266"></span>  $order_total_modules-&gt;pre_confirmation_check();
+<span class="lno" rel="267"></span>  $smarty-&gt;assign(&#39;GV_COVER&#39;, &#39;true&#39;);
+<span class="lno" rel="268"></span>} 
+<span class="lno" rel="269"></span>//Guthaben
+<span class="lno" rel="270"></span>elseif (!isset($_SESSION[&#39;cot_gv&#39;]) || $total &lt;= 0) {
+<span class="lno" rel="271"></span>  $order_total_modules-&gt;pre_confirmation_check();
+</span></td></tr>
+</table><br>
+<table class="tab"><tr><td class="tth"><span class="hdr">/admin/includes/modules/orders_update.php</span></td><td class="tth"><span class="hdr">/admin/includes/modules/orders_update.php</span></td></tr><tr><td class="ttd"><span class="nop"><span class="lno" rel="115"></span>    
+<span class="lno" rel="116"></span>    $sql_data_array = array(
+<span class="lno" rel="117"></span>      &#39;orders_id&#39; =&gt; $oID,
+<span class="lno" rel="118"></span>      &#39;orders_status_id&#39; =&gt; $status,
+<span class="lno" rel="119"></span>      &#39;date_added&#39; =&gt; &#39;now()&#39;,
+<span class="lno" rel="120"></span>      &#39;customer_notified&#39; =&gt; $customer_notified,
+<span class="lno" rel="121"></span>      &#39;comments&#39; =&gt; $comments,
+<span class="lno" rel="122"></span>      &#39;comments_sent&#39; =&gt; ((isset($_POST[&#39;notify_comments&#39;]) &amp;&amp; $_POST[&#39;notify_comments&#39;] == &#39;on&#39;) ? 1 : 0)
+<span class="lno" rel="123"></span>    );
+<span class="lno" rel="124"></span>    xtc_db_perform(TABLE_ORDERS_STATUS_HISTORY,$sql_data_array);
+</span><span class="nop"><span class="lno"> </span>
+<span class="lno"> </span>
+<span class="lno"> </span>
+<span class="lno"> </span>
+<span class="lno"> </span>
+<span class="lno"> </span>
+</span><span class="nop"><span class="lno" rel="125"></span>    $order_updated = true;
+<span class="lno" rel="126"></span>  }
+<span class="lno" rel="127"></span>?&gt;
+</span></td><td class="ttd"><span class="nop"><span class="lno" rel="115"></span>    
+<span class="lno" rel="116"></span>    $sql_data_array = array(
+<span class="lno" rel="117"></span>      &#39;orders_id&#39; =&gt; $oID,
+<span class="lno" rel="118"></span>      &#39;orders_status_id&#39; =&gt; $status,
+<span class="lno" rel="119"></span>      &#39;date_added&#39; =&gt; &#39;now()&#39;,
+<span class="lno" rel="120"></span>      &#39;customer_notified&#39; =&gt; $customer_notified,
+<span class="lno" rel="121"></span>      &#39;comments&#39; =&gt; $comments,
+<span class="lno" rel="122"></span>      &#39;comments_sent&#39; =&gt; ((isset($_POST[&#39;notify_comments&#39;]) &amp;&amp; $_POST[&#39;notify_comments&#39;] == &#39;on&#39;) ? 1 : 0)
+<span class="lno" rel="123"></span>    );
+<span class="lno" rel="124"></span>    xtc_db_perform(TABLE_ORDERS_STATUS_HISTORY,$sql_data_array);
+</span><span class="add"><span class="lno" rel="125"></span>
+<span class="lno" rel="126"></span>    // UNZER MOD START
+<span class="lno" rel="127"></span>    $unzerOrderHelper = new UnzerOrderHelper();
+<span class="lno" rel="128"></span>    $unzerOrderHelper-&gt;listenToOrderStatusChange($oID, $status);
+<span class="lno" rel="129"></span>    // UNZER MOD END
+<span class="lno" rel="130"></span>
+</span><span class="nop"><span class="lno" rel="131"></span>    $order_updated = true;
+<span class="lno" rel="132"></span>  }
+<span class="lno" rel="133"></span>?&gt;
+</span></td></tr>
+</table><br>
+<table class="tab"><tr><td class="tth"><span class="hdr">/includes/classes/payment.php</span></td><td class="tth"><span class="hdr">/includes/classes/payment.php</span></td></tr><tr><td class="ttd"><span class="nop"><span class="lno" rel="511"></span>          } else {
+<span class="lno" rel="512"></span>            return array();          
+<span class="lno" rel="513"></span>          }
+<span class="lno" rel="514"></span>        }
+<span class="lno" rel="515"></span>      }
+<span class="lno" rel="516"></span>    }
+<span class="lno" rel="517"></span>
+<span class="lno" rel="518"></span>    public static function payment_title($payment_method, $order_id = &#39;&#39;) {
+<span class="lno" rel="519"></span>      static $static_payment_array;
+<span class="lno" rel="520"></span>
+</span><span class="nop"><span class="lno"> </span>
+<span class="lno"> </span>
+<span class="lno"> </span>
+<span class="lno"> </span>
+<span class="lno"> </span>
+<span class="lno"> </span>
+<span class="lno"> </span>
+<span class="lno"> </span>
+<span class="lno"> </span>
+<span class="lno"> </span>
+<span class="lno"> </span>
+<span class="lno"> </span>
+<span class="lno"> </span>
+<span class="lno"> </span>
+</span><span class="nop"><span class="lno" rel="521"></span>      if (!isset($static_payment_array)) {
+<span class="lno" rel="522"></span>        $static_payment_array = array();
+<span class="lno" rel="523"></span>      }
+<span class="lno" rel="524"></span>    
+<span class="lno" rel="525"></span>      if ($payment_method != &#39;&#39; &amp;&amp; ($payment_method != &#39;no_payment&#39; || defined(&#39;RUN_MODE_ADMIN&#39;))) {
+<span class="lno" rel="526"></span>        if (!isset($static_payment_array[$payment_method][(int)$order_id])) { 
+<span class="lno" rel="527"></span>          if (is_file(DIR_FS_CATALOG . &#39;includes/modules/payment/&#39; . $payment_method . &#39;.php&#39;)) {
+<span class="lno" rel="528"></span>            include_once(DIR_FS_CATALOG . &#39;lang/&#39; . $_SESSION[&#39;language&#39;] . &#39;/modules/payment/&#39; . $payment_method . &#39;.php&#39;);
+<span class="lno" rel="529"></span>            $payment_name = strip_tags(constant(strtoupper(&#39;MODULE_PAYMENT_&#39; . $payment_method . &#39;_TEXT_TITLE&#39;)));
+<span class="lno" rel="530"></span>
+</span></td><td class="ttd"><span class="nop"><span class="lno" rel="511"></span>          } else {
+<span class="lno" rel="512"></span>            return array();          
+<span class="lno" rel="513"></span>          }
+<span class="lno" rel="514"></span>        }
+<span class="lno" rel="515"></span>      }
+<span class="lno" rel="516"></span>    }
+<span class="lno" rel="517"></span>
+<span class="lno" rel="518"></span>    public static function payment_title($payment_method, $order_id = &#39;&#39;) {
+<span class="lno" rel="519"></span>      static $static_payment_array;
+<span class="lno" rel="520"></span>
+</span><span class="add"><span class="lno" rel="521"></span>      // UNZER MOD START
+<span class="lno" rel="522"></span>      if($payment_method === UnzerConstants::MODULE_NAME){
+<span class="lno" rel="523"></span>          if(!empty($_SESSION[&#39;unzer_payment_method&#39;])) {
+<span class="lno" rel="524"></span>              return UnzerConfigHelper::getPaymentMethodName($_SESSION[&#39;unzer_payment_method&#39;]);
+<span class="lno" rel="525"></span>          }
+<span class="lno" rel="526"></span>          if($order_id) {
+<span class="lno" rel="527"></span>              $orderHelper = new UnzerOrderHelper();
+<span class="lno" rel="528"></span>              if($name = $orderHelper-&gt;getUnzerPaymentMethodNameFromOrderId($order_id)){
+<span class="lno" rel="529"></span>                    return $name;
+<span class="lno" rel="530"></span>              }
+<span class="lno" rel="531"></span>          }
+<span class="lno" rel="532"></span>      }
+<span class="lno" rel="533"></span>      // UNZER MOD END
+<span class="lno" rel="534"></span>
+</span><span class="nop"><span class="lno" rel="535"></span>      if (!isset($static_payment_array)) {
+<span class="lno" rel="536"></span>        $static_payment_array = array();
+<span class="lno" rel="537"></span>      }
+<span class="lno" rel="538"></span>    
+<span class="lno" rel="539"></span>      if ($payment_method != &#39;&#39; &amp;&amp; ($payment_method != &#39;no_payment&#39; || defined(&#39;RUN_MODE_ADMIN&#39;))) {
+<span class="lno" rel="540"></span>        if (!isset($static_payment_array[$payment_method][(int)$order_id])) { 
+<span class="lno" rel="541"></span>          if (is_file(DIR_FS_CATALOG . &#39;includes/modules/payment/&#39; . $payment_method . &#39;.php&#39;)) {
+<span class="lno" rel="542"></span>            include_once(DIR_FS_CATALOG . &#39;lang/&#39; . $_SESSION[&#39;language&#39;] . &#39;/modules/payment/&#39; . $payment_method . &#39;.php&#39;);
+<span class="lno" rel="543"></span>            $payment_name = strip_tags(constant(strtoupper(&#39;MODULE_PAYMENT_&#39; . $payment_method . &#39;_TEXT_TITLE&#39;)));
+<span class="lno" rel="544"></span>
+</span></td></tr>
+</table><br>
+Generated on Mon, 28 Oct 2024 22:50:05 CET<br><br><b>Legend:</b><br><table class="tab">
+<tr><td class="tth"><span class="hdr">filename 1</span></td><td class="tth"><span class="hdr">filename 2</span></td></tr>
+<tr><td class="ttd">
+<span class="del"><span class="lno">1 </span>line deleted</span>
+<span class="nop"><span class="lno">2 </span>no change</span>
+<span class="upd"><span class="lno">3 </span>line modified</span>
+</td>
+<td class="ttd">
+<span class="add"><span class="lno">1 </span>line added</span>
+<span class="nop"><span class="lno">2 </span>no change</span>
+<span class="upd"><span class="lno">3 </span><span class="chg">L</span>ine <span class="chg">M</span>modified</span>
+</td></tr>
+</table>
+</body></html>

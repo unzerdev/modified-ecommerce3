@@ -1,0 +1,49 @@
+{block name="content"}
+    <h3 class="unzer-payment-method-heading">
+        {$txt.UNZER_CONFIGURATION_TITLE}
+    </h3>
+    {function name=writeConfigurationInputFieldInner fieldName="" paymentMethod="" type="text" readonly=0 value=''}
+        {if $type == 'select'}
+            <select class="form-control" id="{$paymentMethod}_{$fieldName}_input" name="unzer_configuration[{$paymentMethod}][{$fieldName}]">
+                {foreach from=$options item=option}
+                    <option value="{$option.value}" {if $option.value == $value}selected="selected"{/if} >{$option.label}</option>
+                {/foreach}
+            </select>
+        {elseif $type == 'bool'}
+            <input type="hidden" name="unzer_configuration[{$paymentMethod}][{$fieldName}]" value="0"/>
+            <input type="checkbox" id="{$paymentMethod}_{$fieldName}_input" value="1" name="unzer_configuration[{$paymentMethod}][{$fieldName}]" class="form-control" {if $value == '1'}checked="checked"{/if}/>
+        {/if}
+    {/function}
+    <table class="unzer-table" cellspacing="0">
+        {foreach $content.paymentMethods as $paymentMethod}
+        <tr class="form-group row" valign="middle">
+            <td>
+                <label class="unzer-payment-method-label" for="{$paymentMethod.originalCode}_status_input">
+                    <div style="width: 42px; display:inline-block;">
+                        <img src="{$paymentMethod.logo_url}" style="max-height:24px;max-width:36px;" alt=""/></div>
+                    {$paymentMethod.module}
+                </label>
+            </td>
+            <td>
+                <div class="col-sm-2">
+                    <div data-gx-widget="switcher">
+                        {if $content.currentConfig[$paymentMethod.originalCode].status == '0'}
+                            {assign var="status" value="0"}
+                        {else}
+                            {assign var="status" value="1"}
+                        {/if}
+                        {writeConfigurationInputFieldInner paymentMethod=$paymentMethod.originalCode fieldName="status" value=$status type="bool"}
+                    </div>
+                </div>
+            </td>
+            <td>
+                <div class="col-sm-6">
+                    {if $paymentMethod.canAuthorize}
+                        {writeConfigurationInputFieldInner paymentMethod=$paymentMethod.originalCode fieldName="transactionType" value=$content.currentConfig[$paymentMethod.originalCode].transactionType  type="select" options=$content.options.transactionTypes}
+                    {/if}
+                </div>
+            </td>
+        </tr>
+        {/foreach}
+    </table>
+{/block}

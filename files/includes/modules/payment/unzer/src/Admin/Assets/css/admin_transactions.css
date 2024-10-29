@@ -1,0 +1,76 @@
+#admin-unzer-transactions .meta-infos {
+    display: flex;
+    width: 100%;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+#admin-unzer-transactions .meta-infos .item {
+    background: #ddd;
+    padding: 20px;
+    white-space: nowrap;
+    font-size: 1.2em;
+}
+
+#admin-unzer-transactions .meta-infos .item .value {
+    display: inline;
+}
+
+#admin-unzer-transactions .action-group {
+    display: flex;
+    gap: 5px;
+}
+
+#admin-unzer-transactions .action-group input {
+    max-width: 120px;
+    text-align: right;
+}
+
+#admin-unzer-transactions .action-group button {
+    white-space: nowrap;
+}
+
+
+#admin-unzer-transactions .refresh-button {
+    margin: 10px 0 0 0;
+}
+
+
+/* modified specific */
+#admin-unzer-transactions .transaction-table {
+    width: 100%;
+}
+
+#admin-unzer-transactions .transaction-table tr:nth-child(odd) {
+    background: #ddd;
+}
+
+#admin-unzer-transactions .transaction-table td {
+    padding: 4px;
+}
+
+#admin-unzer-transactions .transaction-table .transaction-status-error{
+    color: #cc0000;
+}
+
+#admin-unzer-transactions .overview-table td {
+    padding: 4px;
+}
+
+#admin-unzer-transactions .overview-table td:first-child {
+    font-weight: bold;
+}
+
+#unzer-admin-order-block {
+    padding-bottom: 10px;
+    border-bottom: 2px solid #aaa;
+    margin-bottom: 10px;
+}
+
+#unzer-logo-container{
+    margin:10px 0;
+}
+
+#unzer-logo-container img{
+    height:24px;
+}
