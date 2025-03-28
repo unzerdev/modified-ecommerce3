@@ -15,3 +15,13 @@ For more information about configuration, go to the <a href="https://docs.unzer.
 ## Manage payments
 
 For more information, go to the <a href="https://docs.unzer.com/plugins/modified-ecommerce/modified-ecommerce-manage-transaction/" target="_blank">Manage transactions documentation</a>.
+
+
+## Changelog
+
+# v1.1.0
+* Added Direct Transfer localization 
+* PHP-SDK Update to v3.11
+
+# v1.0.0
+* Initial release
