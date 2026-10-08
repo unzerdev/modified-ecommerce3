@@ -19,6 +19,9 @@ For more information, go to the <a href="https://docs.unzer.com/plugins/modified
 
 ## Changelog
 
+# v1.2.0
+* Fix for UPL Payment methods not loading in BE and FE
+
 # v1.1.0
 * Added Direct Transfer localization 
 * PHP-SDK Update to v3.11

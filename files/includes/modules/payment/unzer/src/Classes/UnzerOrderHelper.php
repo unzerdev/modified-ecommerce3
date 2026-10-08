@@ -7,8 +7,17 @@ use UnzerSDK\Resources\Basket;
 use UnzerSDK\Resources\Customer;
 use UnzerSDK\Resources\EmbeddedResources\Address;
 use UnzerSDK\Resources\EmbeddedResources\BasketItem;
+use UnzerSDK\Resources\EmbeddedResources\Paypage\PaymentMethodConfig;
+use UnzerSDK\Resources\EmbeddedResources\Paypage\PaymentMethodsConfigs;
+use UnzerSDK\Resources\EmbeddedResources\Paypage\Resources;
+use UnzerSDK\Resources\EmbeddedResources\Paypage\Urls;
+use UnzerSDK\Resources\EmbeddedResources\RiskData;
 use UnzerSDK\Resources\Metadata;
-use UnzerSDK\Resources\PaymentTypes\Paypage;
+use UnzerSDK\Resources\PaymentTypes\Card;
+use \UnzerSDK\Resources\PaymentTypes\Paypal as UnzerPaypal;
+use UnzerSDK\Resources\PaymentTypes\SepaDirectDebit;
+use UnzerSDK\Resources\TransactionTypes\Authorization;
+use UnzerSDK\Resources\V2\Paypage;
 use UnzerSDK\Unzer;
 
 class UnzerOrderHelper
@@ -26,58 +35,73 @@ class UnzerOrderHelper
     {
         $basket = $this->getUnzerBasket($order);
         $customer = $this->getUnzerCustomer($order);
-        $payPage = new Paypage($basket->getTotalValueGross(), $basket->getCurrencyCode(), xtc_href_link('checkout_process.php', '', 'SSL'));
-        $threatMetrixId = md5(HTTPS_SERVER) . '_' . $order->info['orders_id'];
         $isCustomerRegistered = $this->isCustomerRegistered((int)$order->customer['id']);
-        $payPage
-            ->setAdditionalAttribute('riskData.threatMetrixId', $threatMetrixId)
-            ->setAdditionalAttribute('riskData.customerGroup', 'NEUTRAL')
-            ->setAdditionalAttribute('riskData.customerId', $customer->getCustomerId())
-            ->setAdditionalAttribute('riskData.confirmedAmount', $this->getCustomersTotalOrderAmount((int)$order->customer['id']))
-            ->setAdditionalAttribute('riskData.confirmedOrders', $this->getCustomersTotalNumberOfOrders((int)$order->customer['id']))
-            ->setAdditionalAttribute('riskData.registrationLevel', $isCustomerRegistered ? '1' : '0')
-            ->setAdditionalAttribute('riskData.registrationDate', $this->getCustomersRegistrationDate((int)$order->customer['id']));
 
-        if (!$isCustomerRegistered) {
-            $payPage->setAdditionalAttribute('disabledCOF', 'card,paypal,sepa-direct-debit');
-        }
-
-        $payPage->setOrderId($order->info['orders_id']);
-        $metaData = $this->getMetaData($payPage, $order->info['orders_id']);
+        $config = new PaymentMethodsConfigs();
 
         $transactionType = TransactionTypes::CHARGE;
         if ($selectedPaymentMethod) {
-            $apiHelper = new UnzerApiHelper();
-            foreach ($apiHelper->getAllPaymentMethods() as $paymentMethod) {
-                if (strtolower($paymentMethod->type) !== $selectedPaymentMethod) {
-                    $payPage->addExcludeType($paymentMethod->type);
-                }
+            $config->setDefault((new PaymentMethodConfig())->setEnabled(false));
+            $classNameOfSelectedPaymentMethod = UnzerApiHelper::getClassNameForPaymentType($selectedPaymentMethod);
+            $selectedPaymentMethodConfig = (new PaymentMethodConfig())->setEnabled(true);
+
+            if ($isCustomerRegistered && in_array($classNameOfSelectedPaymentMethod, [Card::class, SepaDirectDebit::class, UnzerPaypal::class])) {
+                $selectedPaymentMethodConfig->setCredentialOnFile(true);
             }
 
+            $config->addMethodConfig($classNameOfSelectedPaymentMethod, $selectedPaymentMethodConfig);
             if (UnzerConfigHelper::getPaymentMethodTransactionType($selectedPaymentMethod) === TransactionTypes::AUTHORIZATION) {
                 $transactionType = TransactionTypes::AUTHORIZATION;
             }
-        }
-        $this->logger->debug('paypage request', [
-            'request'=>$payPage->expose(),
-            'basket'=>$basket->expose(),
-            'customer'=>$customer->expose(),
-            'metaData'=>$metaData->expose(),
-        ]);
-        if ($transactionType === TransactionTypes::AUTHORIZATION) {
-            $return = $this->unzer->initPayPageAuthorize($payPage, $customer, $basket, $metaData);
         } else {
-            $return = $this->unzer->initPayPageCharge($payPage, $customer, $basket, $metaData);
+            if (!$isCustomerRegistered) {
+                $cofDisabledConfig = (new PaymentMethodConfig())->setCredentialOnFile(false);
+                $config
+                    ->addMethodConfig(Card::class, $cofDisabledConfig)
+                    ->addMethodConfig(SepaDirectDebit::class, $cofDisabledConfig)
+                    ->addMethodConfig(Paypal::class, $cofDisabledConfig);
+            }
         }
 
-        $this->logger->debug('paypage result', [
-            'result'=>$return->expose(),
-        ]);
+        $payPage = (new Paypage($basket->getTotalValueGross(), $basket->getCurrencyCode(), $transactionType))
+            ->setPaymentMethodsConfigs($config)
+            ->setType('embedded')
+            ->setCheckoutType('payment_only')
+            ->setOrderId((string)$order->info['orders_id'])
+            ->setUrls((new Urls())
+                ->setReturnSuccess(xtc_href_link('checkout_process.php'))
+                ->setReturnFailure(xtc_href_link('checkout_payment.php', 'payment_error=' . \UnzerConstants::MODULE_NAME, 'SSL'))
+                ->setReturnPending(xtc_href_link('checkout_process.php'))
+                ->setReturnCancel(xtc_href_link('checkout_payment.php'))
+            );
+
+        $risk = new RiskData();
+        $risk->setCustomerGroup('NEUTRAL')
+            ->setConfirmedAmount($this->getCustomersTotalOrderAmount((int)$order->customer['id']))
+            ->setConfirmedOrders($this->getCustomersTotalNumberOfOrders((int)$order->customer['id']))
+            ->setRegistrationLevel($isCustomerRegistered ? '1' : '0')
+            ->setRegistrationDate($this->getCustomersRegistrationDate((int)$order->customer['id']));
+
+        $payPage->setRisk($risk);
+
+        $metaData = $this->getMetaData();
+        $payPage->setResources(
+            new Resources(
+                $customer->getId(),
+                $basket->getId(),
+                $metaData->getId()
+            )
+        );
+
+
+        $return = $this->unzer->createPaypage($payPage);
+
+        $this->logger->debug('paypage data', [$return->expose()]);
 
         return $return;
     }
 
-    protected function getMetaData(Paypage $payPage, $orderId = null): Metadata
+    protected function getMetaData(): Metadata
     {
         $shopVersion = '0.0.0';
 
@@ -94,6 +118,7 @@ class UnzerOrderHelper
             ->setShopVersion($shopVersion)
             ->addMetadata('pluginType', UnzerConstants::META_DATA_PLUGIN_TYPE)
             ->addMetadata('pluginVersion', UnzerConstants::MODULE_VERSION);
+        $metaData = $this->unzer->createMetadata($metaData);
         return $metaData;
     }
 
@@ -177,6 +202,8 @@ class UnzerOrderHelper
         }
         $basket->setBasketItems($basketItems);
 
+        $basket = $this->unzer->createBasket($basket);
+
         return $basket;
     }
 
@@ -195,11 +222,11 @@ class UnzerOrderHelper
         }
 
         $customer
-            ->setFirstname($order->customer['firstname'] ?: null)
-            ->setLastname($order->customer['lastname'] ?: null)
-            ->setPhone($order->customer['telephone'] ?: null)
-            ->setCompany($order->customer['company'] ?: null)
-            ->setEmail($order->customer['email_address'] ?: null);
+            ->setFirstname($order->customer['firstname'] ?: '')
+            ->setLastname($order->customer['lastname'] ?: '')
+            ->setPhone($order->customer['telephone'] ?: '')
+            ->setCompany($order->customer['company'] ?: '')
+            ->setEmail($order->customer['email_address'] ?: '');
 
         $this->setDateOfBirth($customer, $order);
         $this->setAddresses($customer, $order);
@@ -210,6 +237,12 @@ class UnzerOrderHelper
                 $this->unzer->updateCustomer($customer);
             } catch (Exception $e) {
                 $this->logger->warning('update customer failed: ' . $e->getMessage(), [$customer->expose()]);
+            }
+        } else {
+            try {
+                $customer = $this->unzer->createCustomer($customer);
+            } catch (Exception $e) {
+                $this->logger->warning('create customer failed: ' . $e->getMessage(), [$customer->expose()]);
             }
         }
 
@@ -376,6 +409,7 @@ class UnzerOrderHelper
     {
 
         try {
+            /** @var Authorization $transaction */
             $transaction = $payment->getInitialTransaction();
             if ($transaction && $transaction->getBic() && $transaction->getIban() && $transaction->getHolder() && $transaction->getDescriptor()) {
                 UnzerConfigHelper::initTexts();
@@ -450,8 +484,16 @@ class UnzerOrderHelper
     {
         $q = "SELECT customers_date_added FROM " . TABLE_CUSTOMERS . " WHERE customers_id = " . $customerId;
         $rs = xtc_db_query($q);
+
         if ($r = xtc_db_fetch_array($rs)) {
-            return $r['customers_date_added'];
+            if(empty($r['customers_date_added'])) {
+                return null;
+            }
+            $date = new DateTime($r['customers_date_added']);
+            if((int)$date->format('Y') < 1900) {
+                return null;
+            }
+            return $date->format('Ymd');
         } else {
             return null;
         }

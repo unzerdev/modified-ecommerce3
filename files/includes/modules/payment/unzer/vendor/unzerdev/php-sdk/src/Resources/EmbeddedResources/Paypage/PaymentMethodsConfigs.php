@@ -12,6 +12,7 @@ class PaymentMethodsConfigs extends AbstractUnzerResource
         'card' => 'cards',
         'eps' => 'eps',
         'payu' => 'payu',
+        'openbankingpis' => 'openbankingpis',
         'postfinanceefinance' => 'pfefinance',
         'postfinancecard' => 'pfcard'
     ];
